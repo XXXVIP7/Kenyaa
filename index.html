@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Predictor na AI - Kenya</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .console-box {
+        font-family: monospace;
+        background-color: #1a1a1a;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 0 20px #00ff88;
+        color: #00ff88;
+        height: 250px;
+        overflow-y: auto;
+      }
+      .loading-screen {
+        font-family: monospace;
+        background: #000;
+        color: #00ff88;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        flex-direction: column;
+        z-index: 50;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+      }
+      .hidden-screen,
+      .hidden {
+        display: none;
+      }
+      .game-btn {
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .game-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+      .disabled-btn {
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-900 text-white font-sans">
+    <div id="loading" class="loading-screen">
+      <p>Loading... Tulia kiasi tunaset experience yako.</p>
+    </div>
+
+    <div id="mainContent" class="hidden-screen">
+      <header class="w-full bg-gray-800 p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold text-green-400">CAZEUS AI Predictor</h1>
+        <nav class="space-x-4">
+          <a href="#how" class="hover:text-green-400">Vile Inawork</a>
+          <a href="#games" class="hover:text-green-400">Games</a>
+          <a href="#start" class="hover:text-green-400">Anza</a>
+        </nav>
+      </header>
+
+      <section
+        class="min-h-screen flex flex-col items-center justify-center px-4 text-center"
+      >
+        <h2 class="text-3xl md:text-5xl font-bold mb-6">
+          Piga Doo na AI Game Predictions
+        </h2>
+        <p class="max-w-xl mb-8 text-gray-300">
+          Join wasee wengi Kenya wanatumia AI yetu kula kwa games kama Aviator, Mines na Penalty. 
+          96% accuracy, signals za ukweli na withdrawals chap chap kwa M-Pesa.
+        </p>
+
+        <button
+          id="startButton"
+          class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-xl text-lg transition"
+        >
+          Anza Kuunda Doo Sasa
+        </button>
+
+        <div id="gameButtonsSection" class="hidden mt-8 w-full max-w-md">
+          <h3 class="text-xl font-semibold mb-4">Chagua Game Yako</h3>
+          <div class="grid grid-cols-1 gap-4">
+            <a
+              href="https://clp-aviator.vercel.app/"
+              class="game-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg"
+            >
+              Aviator Predictions
+            </a>
+            <a
+              href="https://clp-mines.vercel.app/"
+              class="game-btn bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg"
+            >
+              Mines Predictions
+            </a>
+            <a
+              href="https://clp-penalty.vercel.app/"
+              class="game-btn bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg"
+            >
+              Penalty Predictions
+            </a>
+            <a
+              href="https://clp-chicken.vercel.app/"
+              class="game-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg"
+            >
+              Chicken Road Predictions
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section class="bg-gray-800 py-12 px-6 text-center">
+        <h3 class="text-2xl font-bold text-green-400 mb-6">
+          Washindi wa Leo (KES)
+        </h3>
+        <div
+          class="grid md:grid-cols-2 gap-4 text-left max-w-4xl mx-auto text-sm text-green-300"
+        >
+          <p>👤 User ID: 1218473422 – KSh 250,328</p>
+          <p>👤 User ID: 9912384741 – KSh 221,900</p>
+          <p>👤 User ID: 3099234822 – KSh 184,120</p>
+          <p>👤 User ID: 1187339121 – KSh 150,000</p>
+          <p>👤 User ID: 4412900113 – KSh 132,850</p>
+          <p>👤 User ID: 8283721091 – KSh 128,440</p>
+          <p>👤 User ID: 7751937742 – KSh 100,705</p>
+          <p>👤 User ID: 5554921811 – KSh 98,330</p>
+          <p>👤 User ID: 1983238742 – KSh 85,000</p>
+          <p>👤 User ID: 3377749301 – KSh 79,210</p>
+        </div>
+      </section>
+
+      <section class="bg-black py-12 px-6 text-center">
+        <h3 class="text-xl font-bold text-green-400 mb-4">
+          [ Console Log ]
+        </h3>
+        <div class="console-box max-w-3xl mx-auto text-left" id="console">
+          <p>[INFO] Predictor Service iko Active ✅</p>
+        </div>
+      </section>
+
+      <footer class="text-center text-gray-500 text-sm py-6">
+        © 2025 Predictor IA. Haihusi Betwinner. Cheza kistaarabu (Gamble Responsibly).
+      </footer>
+    </div>
+
+    <script>
+      // Экран загрузки
+      setTimeout(() => {
+        document.getElementById("loading").classList.add("hidden-screen");
+        document
+          .getElementById("mainContent")
+          .classList.remove("hidden-screen");
+      }, 3000);
+
+      // Элементы
+      const startButton = document.getElementById("startButton");
+      const gameButtonsSection = document.getElementById("gameButtonsSection");
+      
+      // Логика кнопок
+      startButton.addEventListener("click", () => {
+        startButton.classList.add("hidden");
+        gameButtonsSection.classList.remove("hidden");
+      });
+
+      // Симуляция консоли
+      const consoleElement = document.getElementById("console");
+      const messages = [
+        "[SYSTEM] Analyzing game patterns...",
+        "[IA] 3 signals mpya zimepatikana",
+        "[USER] ID 88475291 ame-connect",
+        "[PAYOUT] Withdrawal imetoka: KSh 15,250",
+        "[UPDATE] Database imekuwa synchronized",
+      ];
+
+      let messageIndex = 0;
+      setInterval(() => {
+        if (messageIndex < messages.length) {
+          const p = document.createElement("p");
+          p.textContent = messages[messageIndex];
+          consoleElement.appendChild(p);
+          consoleElement.scrollTop = consoleElement.scrollHeight;
+          messageIndex++;
+        }
+      }, 2500);
+    </script>
+  </body>
+</html>
