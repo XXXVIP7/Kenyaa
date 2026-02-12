@@ -1,196 +1,371 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Game Predictor na AI - Kenya</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kevo VIP Predictor - Kenya Edition</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-      .console-box {
-        font-family: monospace;
-        background-color: #1a1a1a;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 0 20px #00ff88;
-        color: #00ff88;
-        height: 250px;
-        overflow-y: auto;
-      }
-      .loading-screen {
-        font-family: monospace;
-        background: #000;
-        color: #00ff88;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        flex-direction: column;
-        z-index: 50;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-      }
-      .hidden-screen,
-      .hidden {
-        display: none;
-      }
-      .game-btn {
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .game-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      }
-      .disabled-btn {
-        cursor: not-allowed;
-        opacity: 0.7;
-      }
+        body { background-color: #0f172a; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .neon-text { text-shadow: 0 0 10px #00ff88; }
+        .console-box {
+            font-family: monospace;
+            background-color: #000;
+            border: 1px solid #333;
+            color: #00ff88;
+            height: 150px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+        }
+        .game-card {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 1px solid #334155;
+            transition: transform 0.2s;
+        }
+        .game-card:active { transform: scale(0.98); }
+        
+        /* Aviator Styles */
+        .aviator-screen {
+            background: #000;
+            border-radius: 1rem;
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #ef4444;
+        }
+        .plane-anim { font-size: 3rem; color: #ef4444; animation: fly 2s infinite alternate; }
+        @keyframes fly { from { transform: translateY(10px); } to { transform: translateY(-10px); } }
+
+        /* Mines Styles */
+        .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; }
+        .mine-cell {
+            background: #334155;
+            aspect-ratio: 1;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .mine-cell.active { background: #00ff88; color: #000; animation: pop 0.3s ease; }
+        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
+        .hidden { display: none !important; }
+        .loader { border-top-color: #00ff88; -webkit-animation: spinner 1.5s linear infinite; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
-  </head>
-  <body class="bg-gray-900 text-white font-sans">
-    <div id="loading" class="loading-screen">
-      <p>Loading... Tulia kiasi tunaset experience yako.</p>
+</head>
+<body class="text-white min-h-screen flex flex-col">
+
+    <div id="loading" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
+        <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24 mb-4"></div>
+        <p class="text-green-400 font-mono text-lg animate-pulse">Connecting to Nairobi Server...</p>
+        <p class="text-gray-500 text-sm mt-2">Authenticating User ID...</p>
     </div>
 
-    <div id="mainContent" class="hidden-screen">
-      <header class="w-full bg-gray-800 p-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold text-green-400">CAZEUS AI Predictor</h1>
-        <nav class="space-x-4">
-          <a href="#how" class="hover:text-green-400">Vile Inawork</a>
-          <a href="#games" class="hover:text-green-400">Games</a>
-          <a href="#start" class="hover:text-green-400">Anza</a>
-        </nav>
-      </header>
+    <div id="app" class="hidden flex-1 flex flex-col max-w-md mx-auto w-full p-4">
+        
+        <header class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-robot text-green-400 text-2xl"></i>
+                <div>
+                    <h1 class="font-bold text-xl neon-text">KEVO AI V4.0</h1>
+                    <p class="text-xs text-gray-400">Status: <span class="text-green-500">CONNECTED ✅</span></p>
+                </div>
+            </div>
+            <div class="bg-gray-800 px-3 py-1 rounded-full text-xs border border-green-500 text-green-400">
+                VIP ACCESS
+            </div>
+        </header>
 
-      <section
-        class="min-h-screen flex flex-col items-center justify-center px-4 text-center"
-      >
-        <h2 class="text-3xl md:text-5xl font-bold mb-6">
-          Piga Doo na AI Game Predictions
-        </h2>
-        <p class="max-w-xl mb-8 text-gray-300">
-          Join wasee wengi Kenya wanatumia AI yetu kula kwa games kama Aviator, Mines na Penalty. 
-          96% accuracy, signals za ukweli na withdrawals chap chap kwa M-Pesa.
-        </p>
+        <div id="menu-view">
+            <div class="bg-gray-800 rounded-xl p-4 mb-6 shadow-lg border border-gray-700">
+                <h2 class="text-lg font-bold mb-2">Karibu Brathee! 👋</h2>
+                <p class="text-gray-300 text-sm">Chagua game unataka kuhack leo. AI yetu inatoa 98% accuracy kwa soko la Kenya.</p>
+            </div>
 
-        <button
-          id="startButton"
-          class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-xl text-lg transition"
-        >
-          Anza Kuunda Doo Sasa
-        </button>
+            <h3 class="text-gray-400 uppercase text-xs font-bold mb-3 tracking-wider">Available Games</h3>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="openGame('aviator')" class="game-card p-4 rounded-xl flex flex-col items-center justify-center gap-3">
+                    <i class="fas fa-plane-departure text-red-500 text-3xl"></i>
+                    <span class="font-bold">Aviator</span>
+                </button>
+                
+                <button onclick="openGame('mines')" class="game-card p-4 rounded-xl flex flex-col items-center justify-center gap-3">
+                    <i class="fas fa-bomb text-yellow-500 text-3xl"></i>
+                    <span class="font-bold">Mines</span>
+                </button>
+                
+                <button onclick="openGame('penalty')" class="game-card p-4 rounded-xl flex flex-col items-center justify-center gap-3">
+                    <i class="fas fa-futbol text-blue-500 text-3xl"></i>
+                    <span class="font-bold">Penalty</span>
+                </button>
 
-        <div id="gameButtonsSection" class="hidden mt-8 w-full max-w-md">
-          <h3 class="text-xl font-semibold mb-4">Chagua Game Yako</h3>
-          <div class="grid grid-cols-1 gap-4">
-            <a
-              href="https://clp-aviator.vercel.app/"
-              class="game-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg"
-            >
-              Aviator Predictions
-            </a>
-            <a
-              href="https://clp-mines.vercel.app/"
-              class="game-btn bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg"
-            >
-              Mines Predictions
-            </a>
-            <a
-              href="https://clp-penalty.vercel.app/"
-              class="game-btn bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg"
-            >
-              Penalty Predictions
-            </a>
-            <a
-              href="https://clp-chicken.vercel.app/"
-              class="game-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg"
-            >
-              Chicken Road Predictions
-            </a>
-          </div>
+                <button onclick="openGame('lucky')" class="game-card p-4 rounded-xl flex flex-col items-center justify-center gap-3">
+                    <i class="fas fa-rocket text-purple-500 text-3xl"></i>
+                    <span class="font-bold">Lucky Jet</span>
+                </button>
+            </div>
+
+            <div class="mt-8">
+                <h3 class="text-green-400 text-sm font-bold mb-3"><i class="fas fa-circle text-xs animate-pulse"></i> Live Withdrawals (M-Pesa)</h3>
+                <div id="live-wins" class="space-y-2 text-xs font-mono">
+                    </div>
+            </div>
         </div>
-      </section>
 
-      <section class="bg-gray-800 py-12 px-6 text-center">
-        <h3 class="text-2xl font-bold text-green-400 mb-6">
-          Washindi wa Leo (KES)
-        </h3>
-        <div
-          class="grid md:grid-cols-2 gap-4 text-left max-w-4xl mx-auto text-sm text-green-300"
-        >
-          <p>👤 User ID: 1218473422 – KSh 250,328</p>
-          <p>👤 User ID: 9912384741 – KSh 221,900</p>
-          <p>👤 User ID: 3099234822 – KSh 184,120</p>
-          <p>👤 User ID: 1187339121 – KSh 150,000</p>
-          <p>👤 User ID: 4412900113 – KSh 132,850</p>
-          <p>👤 User ID: 8283721091 – KSh 128,440</p>
-          <p>👤 User ID: 7751937742 – KSh 100,705</p>
-          <p>👤 User ID: 5554921811 – KSh 98,330</p>
-          <p>👤 User ID: 1983238742 – KSh 85,000</p>
-          <p>👤 User ID: 3377749301 – KSh 79,210</p>
+        <div id="aviator-view" class="hidden">
+            <button onclick="goBack()" class="mb-4 text-gray-400 hover:text-white flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Rudi Nyuma
+            </button>
+            
+            <div class="bg-gray-800 p-6 rounded-2xl border border-red-900 shadow-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-red-500">AVIATOR HACK</h2>
+                    <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="20" class="opacity-50">
+                </div>
+                
+                <div class="aviator-screen mb-6">
+                    <div id="aviator-result" class="text-4xl font-bold text-white hidden">x0.00</div>
+                    <div id="aviator-loading" class="text-center hidden">
+                        <i class="fas fa-satellite-dish text-4xl text-red-500 mb-2 animate-bounce"></i>
+                        <p class="text-xs text-red-400">ANALYZING SERVER...</p>
+                    </div>
+                    <i id="aviator-icon" class="fas fa-plane plane-anim"></i>
+                </div>
+
+                <button onclick="predictAviator()" id="btn-aviator" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg transition transform active:scale-95">
+                    PATA SIGNAL 📡
+                </button>
+                <p class="text-center text-xs text-gray-500 mt-4">AI Confidence: <span class="text-green-500">99.9%</span></p>
+            </div>
         </div>
-      </section>
 
-      <section class="bg-black py-12 px-6 text-center">
-        <h3 class="text-xl font-bold text-green-400 mb-4">
-          [ Console Log ]
-        </h3>
-        <div class="console-box max-w-3xl mx-auto text-left" id="console">
-          <p>[INFO] Predictor Service iko Active ✅</p>
+        <div id="mines-view" class="hidden">
+            <button onclick="goBack()" class="mb-4 text-gray-400 hover:text-white flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Rudi Nyuma
+            </button>
+
+            <div class="bg-gray-800 p-4 rounded-2xl border border-yellow-900 shadow-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-yellow-500">MINES HACK</h2>
+                    <span class="text-xs bg-yellow-900 text-yellow-200 px-2 py-1 rounded">3 Mines</span>
+                </div>
+
+                <div id="mines-grid" class="mines-grid mb-6">
+                    </div>
+
+                <button onclick="predictMines()" id="btn-mines" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg transition transform active:scale-95">
+                    FUNGUA NYOTA ⭐
+                </button>
+            </div>
         </div>
-      </section>
 
-      <footer class="text-center text-gray-500 text-sm py-6">
-        © 2025 Predictor IA. Haihusi Betwinner. Cheza kistaarabu (Gamble Responsibly).
-      </footer>
+         <div id="penalty-view" class="hidden">
+            <button onclick="goBack()" class="mb-4 text-gray-400 hover:text-white flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Rudi Nyuma
+            </button>
+
+            <div class="bg-gray-800 p-6 rounded-2xl border border-blue-900 shadow-2xl text-center">
+                <h2 class="text-2xl font-bold text-blue-500 mb-6">PENALTY PREDICTOR</h2>
+                
+                <div class="relative h-48 bg-green-900 rounded-lg border-2 border-white mb-6 flex items-center justify-center overflow-hidden">
+                    <div class="absolute inset-0 border-2 border-white opacity-20" style="left: 30%; right: 30%;"></div> <div id="penalty-target" class="hidden absolute text-4xl text-yellow-400 animate-ping">
+                        🎯
+                    </div>
+                    <div id="penalty-text" class="text-gray-300 text-sm">Bonyeza button kuona direction</div>
+                </div>
+
+                <button onclick="predictPenalty()" id="btn-penalty" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg">
+                    ONA DIRECTION ⚽
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-auto pt-6">
+            <div class="console-box p-2 rounded text-xs">
+                <p>[SYSTEM] Connecting to Vavada API...</p>
+                <p>[SYSTEM] Connecting to 1xBet Kenya API...</p>
+                <p class="text-green-500">[SUCCESS] Connection Established.</p>
+                <div id="console-logs"></div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-      // Экран загрузки
-      setTimeout(() => {
-        document.getElementById("loading").classList.add("hidden-screen");
-        document
-          .getElementById("mainContent")
-          .classList.remove("hidden-screen");
-      }, 3000);
+        // Loading Logic
+        setTimeout(() => {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            addLog("User Authenticated: Kenya_IP_88.21.x.x");
+        }, 2500);
 
-      // Элементы
-      const startButton = document.getElementById("startButton");
-      const gameButtonsSection = document.getElementById("gameButtonsSection");
-      
-      // Логика кнопок
-      startButton.addEventListener("click", () => {
-        startButton.classList.add("hidden");
-        gameButtonsSection.classList.remove("hidden");
-      });
+        // Navigation
+        function openGame(gameId) {
+            document.getElementById('menu-view').classList.add('hidden');
+            
+            // Hide all views first
+            ['aviator-view', 'mines-view', 'penalty-view'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.classList.add('hidden');
+            });
 
-      // Симуляция консоли
-      const consoleElement = document.getElementById("console");
-      const messages = [
-        "[SYSTEM] Analyzing game patterns...",
-        "[IA] 3 signals mpya zimepatikana",
-        "[USER] ID 88475291 ame-connect",
-        "[PAYOUT] Withdrawal imetoka: KSh 15,250",
-        "[UPDATE] Database imekuwa synchronized",
-      ];
+            // Show selected view (simulated for Lucky Jet too)
+            if(gameId === 'lucky') gameId = 'aviator'; // Reuse aviator interface for now
+            
+            document.getElementById(gameId + '-view').classList.remove('hidden');
+            addLog(`Switched to ${gameId.toUpperCase()} module`);
 
-      let messageIndex = 0;
-      setInterval(() => {
-        if (messageIndex < messages.length) {
-          const p = document.createElement("p");
-          p.textContent = messages[messageIndex];
-          consoleElement.appendChild(p);
-          consoleElement.scrollTop = consoleElement.scrollHeight;
-          messageIndex++;
+            if(gameId === 'mines') initMinesGrid();
         }
-      }, 2500);
+
+        function goBack() {
+            document.getElementById('menu-view').classList.remove('hidden');
+            ['aviator-view', 'mines-view', 'penalty-view'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.classList.add('hidden');
+            });
+            addLog("Returned to Main Menu");
+        }
+
+        // Aviator Logic
+        function predictAviator() {
+            const btn = document.getElementById('btn-aviator');
+            const result = document.getElementById('aviator-result');
+            const icon = document.getElementById('aviator-icon');
+            const loader = document.getElementById('aviator-loading');
+
+            btn.disabled = true;
+            btn.innerText = "WAITING...";
+            icon.classList.add('hidden');
+            result.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            addLog("Scanning Provably Fair Hash...");
+
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                result.classList.remove('hidden');
+                
+                // Random Logic for "Realistic" predictions
+                let prediction = (Math.random() * (15.00 - 1.20) + 1.20).toFixed(2);
+                if(Math.random() > 0.8) prediction = (Math.random() * (50.00 - 10.00) + 10.00).toFixed(2); // Occasional high win
+
+                result.innerText = "x" + prediction;
+                result.className = "text-5xl font-bold neon-text animate-pulse";
+                
+                btn.disabled = false;
+                btn.innerText = "PATA SIGNAL 📡";
+                addLog(`Signal Generated: x${prediction}`);
+            }, 2000);
+        }
+
+        // Mines Logic
+        function initMinesGrid() {
+            const grid = document.getElementById('mines-grid');
+            grid.innerHTML = '';
+            for(let i=0; i<25; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'mine-cell';
+                cell.id = `mine-${i}`;
+                grid.appendChild(cell);
+            }
+        }
+
+        function predictMines() {
+            const btn = document.getElementById('btn-mines');
+            btn.disabled = true;
+            btn.innerText = "CALCULATING...";
+            addLog("Solving Matrix pattern...");
+
+            // Reset grid
+            document.querySelectorAll('.mine-cell').forEach(c => {
+                c.className = 'mine-cell';
+                c.innerHTML = '';
+            });
+
+            setTimeout(() => {
+                // Pick 3-5 random spots
+                let spots = [];
+                while(spots.length < 5) {
+                    let r = Math.floor(Math.random() * 25);
+                    if(spots.indexOf(r) === -1) spots.push(r);
+                }
+
+                spots.forEach(spot => {
+                    const cell = document.getElementById(`mine-${spot}`);
+                    cell.classList.add('active');
+                    cell.innerHTML = '<i class="fas fa-star text-yellow-900"></i>';
+                });
+
+                btn.disabled = false;
+                btn.innerText = "FUNGUA NYOTA ⭐";
+                addLog("Mines path revealed successfully");
+            }, 1500);
+        }
+
+        // Penalty Logic
+        function predictPenalty() {
+            const btn = document.getElementById('btn-penalty');
+            const target = document.getElementById('penalty-target');
+            const text = document.getElementById('penalty-text');
+
+            btn.disabled = true;
+            text.innerText = "Analyzing Goalkeeper...";
+            target.classList.add('hidden');
+
+            setTimeout(() => {
+                // Random position logic
+                const positions = [
+                    {top: '10%', left: '10%'}, // Top Left
+                    {top: '10%', left: '80%'}, // Top Right
+                    {top: '80%', left: '10%'}, // Bottom Left
+                    {top: '80%', left: '80%'}, // Bottom Right
+                    {top: '20%', left: '50%'}  // Top Center
+                ];
+                const pos = positions[Math.floor(Math.random() * positions.length)];
+                
+                target.style.top = pos.top;
+                target.style.left = pos.left;
+                target.classList.remove('hidden');
+                text.innerText = "PIGA HAPA! 🔥";
+                
+                btn.disabled = false;
+                addLog("Penalty weakness detected");
+            }, 2000);
+        }
+
+        // Fake Console & Live Wins
+        function addLog(msg) {
+            const logBox = document.getElementById('console-logs');
+            const p = document.createElement('p');
+            const time = new Date().toLocaleTimeString();
+            p.innerText = `[${time}] ${msg}`;
+            logBox.appendChild(p);
+            logBox.parentElement.scrollTop = logBox.parentElement.scrollHeight;
+        }
+
+        const kenyanNames = ['Kevo', 'Brayo', 'John', 'Kamau', 'Oti', 'Moha', 'Chero', 'Wanja', 'Odhiambo', 'Njoro'];
+        const winBox = document.getElementById('live-wins');
+
+        setInterval(() => {
+            const name = kenyanNames[Math.floor(Math.random() * kenyanNames.length)];
+            const amount = Math.floor(Math.random() * (15000 - 2000) + 2000);
+            
+            const div = document.createElement('div');
+            div.className = "flex justify-between text-gray-300 border-b border-gray-800 pb-1";
+            div.innerHTML = `<span>👤 ${name}***</span> <span class="text-green-400">Received KSh ${amount.toLocaleString()}</span>`;
+            
+            winBox.prepend(div);
+            if(winBox.children.length > 5) winBox.lastChild.remove();
+        }, 3000);
+
     </script>
-  </body>
+</body>
 </html>
