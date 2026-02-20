@@ -13,10 +13,14 @@
             background: linear-gradient(145deg, #1e293b, #0f172a);
             border: 1px solid #334155;
             cursor: pointer;
+            transition: all 0.2s;
         }
+        .game-card:active { transform: scale(0.95); }
         .hidden { display: none !important; }
         .blur-bg { backdrop-filter: blur(10px); }
         input::placeholder { color: #4b5563; }
+        .animate-flicker { animation: flicker 2s infinite; }
+        @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     </style>
 </head>
 <body class="text-white min-h-screen flex flex-col p-4 max-w-md mx-auto">
@@ -30,8 +34,8 @@
         </header>
 
         <div class="bg-gray-800 p-4 rounded-xl mb-6 border border-gray-700">
-            <h2 class="font-bold mb-1 text-yellow-500">Sema Brathee! 👋</h2>
-            <p class="text-xs text-gray-400">Enter your ID kwanza ndio AI i-link na account yako.</p>
+            <h2 class="font-bold mb-1 text-yellow-500 italic">Sema Brathee! 👋</h2>
+            <p class="text-xs text-gray-400 font-medium">Enter your Account ID kwanza ndio AI i-link na account yako ya Aviator.</p>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
@@ -39,18 +43,26 @@
                 <i class="fas fa-plane-departure text-red-500 text-3xl"></i>
                 <span class="font-bold text-sm text-center">Aviator Predictor</span>
             </div>
-            <div onclick="requestID('mines')" class="game-card p-4 rounded-xl flex flex-col items-center gap-2">
+            <div onclick="requestID('mines')" class="game-card p-4 rounded-xl flex flex-col items-center gap-2 border-yellow-900/30">
                 <i class="fas fa-bomb text-yellow-500 text-3xl"></i>
                 <span class="font-bold text-sm text-center">Mines Hack</span>
             </div>
-            <div onclick="requestID('penalty')" class="game-card p-4 rounded-xl flex flex-col items-center gap-2">
+            <div onclick="requestID('penalty')" class="game-card p-4 rounded-xl flex flex-col items-center gap-2 border-blue-900/30">
                 <i class="fas fa-futbol text-blue-500 text-3xl"></i>
                 <span class="font-bold text-sm text-center">Penalty Target</span>
             </div>
             <div class="game-card p-4 rounded-xl flex flex-col items-center gap-2 opacity-40">
                 <i class="fas fa-lock text-gray-500 text-3xl"></i>
-                <span class="font-bold text-sm text-center">VIP Slots</span>
+                <span class="font-bold text-sm text-center italic text-gray-500">VIP Slots</span>
             </div>
+        </div>
+
+        <div class="mt-8 bg-black/40 p-4 rounded-xl border border-gray-800">
+            <h3 class="text-green-400 text-[10px] font-bold mb-2 flex items-center gap-2 tracking-widest uppercase">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
+                Live M-Pesa Withdrawals:
+            </h3>
+            <div id="live-wins" class="text-[11px] space-y-1 font-mono text-gray-400"></div>
         </div>
     </div>
 
@@ -59,39 +71,40 @@
             <div class="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-900">
                 <i class="fas fa-fingerprint text-white text-3xl"></i>
             </div>
-            <h2 class="text-xl font-bold mb-2">VERIFY ACCOUNT</h2>
+            <h2 class="text-xl font-bold mb-2 uppercase">Verify Account</h2>
             <p class="text-gray-400 text-sm mb-6">
-                Weka Game ID yako hapa chini ndio tuanze hacking process.
+                Weka Game ID yako hapa chini ndio tu-sync signals na account yako.
             </p>
             <input type="number" id="user-id-input" placeholder="E.g. 55823190" class="w-full bg-black border border-gray-600 rounded-xl p-4 text-center text-xl font-mono mb-4 focus:border-blue-500 outline-none">
-            <button onclick="processID()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition-all active:scale-95">
+            <button onclick="processID()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-blue-900/20">
                 VERIFY ID ➜
             </button>
-            <button onclick="closeModals()" class="mt-4 text-gray-600 text-xs uppercase font-bold">Cancel</button>
+            <button onclick="closeModals()" class="mt-4 text-gray-600 text-[10px] uppercase font-bold tracking-widest">Close</button>
         </div>
     </div>
 
     <div id="error-modal" class="hidden fixed inset-0 blur-bg bg-black/90 flex items-center justify-center z-50 p-6">
-        <div class="bg-gray-900 border-2 border-red-600 rounded-3xl p-6 w-full text-center">
+        <div class="bg-gray-900 border-2 border-red-600 rounded-3xl p-6 w-full text-center shadow-[0_0_40px_rgba(220,38,38,0.3)]">
             <div class="text-red-600 text-6xl mb-4 animate-bounce">
                 <i class="fas fa-exclamation-triangle"></i>
             </div>
-            <h2 class="text-2xl font-black mb-2 text-white">ACTIVATION FAILED! 🚨</h2>
-            <p class="text-gray-300 text-sm mb-6">
-                Account ID <span id="display-id" class="text-white font-bold"></span> is <span class="text-red-500 font-bold underline">Inactive</span>. 
-                System yetu inakataa. Unahitaji balance ya angalau <span class="text-yellow-500 font-bold">350 KSh</span> kwa account yako kwanza ndio upate hizi signals.
+            <h2 class="text-2xl font-black mb-1 text-white uppercase italic">Access Failed!</h2>
+            <p class="text-gray-300 text-sm mb-6 leading-tight">
+                Account ID <span id="display-id" class="text-white font-bold"></span> is <span class="text-red-500 font-bold underline">Not Active</span> in our VIP system.
             </p>
             
             <div class="bg-red-900/20 p-4 rounded-xl mb-6 text-left border border-red-900/50">
-                <p class="text-red-500 font-bold text-[10px] mb-1 italic">ERROR CODE: 0x350_LOW_BALANCE</p>
-                <p class="text-gray-400 text-[11px]">Buda, deposit <span class="text-white font-bold">350 KSh</span> saizi, kisha rudi hapa ku-unlock signals.</p>
+                <p class="text-red-500 font-bold text-[10px] mb-1 italic">SYSTEM STATUS: INACTIVE_BALANCE</p>
+                <p class="text-gray-400 text-[12px] leading-snug">
+                    Buda, unahitaji balance ya angalau <span class="text-white font-bold">350 KSh</span> kwa account yako kwanza ndio hizi signals zi-work. 
+                </p>
             </div>
 
-            <a href="ТВОЯ_ССЫЛКА_ТУТ" class="block w-full bg-red-600 hover:bg-red-700 py-4 rounded-xl font-black text-lg shadow-lg mb-4 transition-transform active:scale-95">
+            <a href="https://reffpa.com/L?tag=d_4299217m_2804c_&site=4299217&ad=2804&r=registration" class="block w-full bg-red-600 hover:bg-red-700 py-5 rounded-xl font-black text-lg shadow-lg mb-4 transition-transform active:scale-95 text-white uppercase tracking-tighter">
                 DEPOSIT 350 KSh NOW 💸
             </a>
             
-            <p class="text-gray-500 text-[10px] uppercase">Wait 5 mins after deposit for activation</p>
+            <p class="text-gray-500 text-[9px] uppercase font-bold animate-flicker italic">System will unlock signals automatically after deposit</p>
         </div>
     </div>
 
@@ -104,7 +117,7 @@
             document.getElementById('id-modal').classList.remove('hidden');
         }
 
-        // Обработка ID и показ ошибки
+        // Имитация процесса проверки и показ ошибки
         function processID() {
             const idInput = document.getElementById('user-id-input').value;
             if (idInput.length < 4) {
@@ -113,16 +126,17 @@
             }
 
             const btn = document.querySelector('#id-modal button');
-            btn.innerText = "CONNECTING TO DATABASE...";
+            const originalText = btn.innerText;
+            btn.innerText = "CONNECTING TO SERVER...";
             btn.disabled = true;
 
             setTimeout(() => {
                 document.getElementById('display-id').innerText = idInput;
                 document.getElementById('id-modal').classList.add('hidden');
                 document.getElementById('error-modal').classList.remove('hidden');
-                btn.innerText = "VERIFY ID ➜";
+                btn.innerText = originalText;
                 btn.disabled = false;
-            }, 1500);
+            }, 1800);
         }
 
         function closeModals() {
@@ -130,20 +144,20 @@
             document.getElementById('error-modal').classList.add('hidden');
         }
 
-        // Остальная логика (Live Feed)
+        // Live Feed имитация M-Pesa выводов
         setInterval(() => {
-            const names = ['Kevo', 'Sammy', 'Deno', 'Moha', 'Omosh'];
+            const names = ['Kevo', 'Sammy', 'Deno', 'Moha', 'Omosh', 'Brayo', 'Jymo'];
             const n = names[Math.floor(Math.random()*names.length)];
-            const sum = Math.floor(Math.random() * 5000) + 500;
+            const sum = Math.floor(Math.random() * 6500) + 850;
             const div = document.createElement('div');
-            div.className = "flex justify-between border-b border-gray-900 pb-1 py-1";
-            div.innerHTML = `<span class="text-green-500 font-bold">➜ ${n}</span> <span class="text-gray-500">KSh ${sum} withdrawn</span>`;
+            div.className = "flex justify-between border-b border-gray-900 pb-1 py-1 animate-pulse";
+            div.innerHTML = `<span class="text-green-500 font-bold">➜ ${n}</span> <span class="text-gray-500 italic">KSh ${sum} withdrawn</span>`;
             const box = document.getElementById('live-wins');
             if(box) {
                 box.prepend(div);
-                if(box.children.length > 4) box.lastChild.remove();
+                if(box.children.length > 5) box.lastChild.remove();
             }
-        }, 3000);
+        }, 2500);
     </script>
 </body>
 </html>
