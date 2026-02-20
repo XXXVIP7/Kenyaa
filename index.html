@@ -7,256 +7,142 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0f172a; font-family: sans-serif; }
+        body { background-color: #0f172a; font-family: sans-serif; overflow-x: hidden; }
         .neon-text { text-shadow: 0 0 10px #00ff88; }
         .game-card {
             background: linear-gradient(145deg, #1e293b, #0f172a);
             border: 1px solid #334155;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
-        .game-card:hover { border-color: #00ff88; transform: translateY(-2px); }
-        .game-card:active { transform: scale(0.95); }
-        
-        .aviator-screen {
-            background: #000;
-            border-radius: 1rem;
-            height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #ef4444;
-            position: relative;
-            overflow: hidden;
-        }
-        .plane-anim { font-size: 3rem; color: #ef4444; animation: fly 1s infinite alternate; }
-        @keyframes fly { from { transform: translateY(10px); } to { transform: translateY(-10px); } }
-
-        .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; }
-        .mine-cell {
-            background: #334155;
-            aspect-ratio: 1;
-            border-radius: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .mine-cell.active { background: #00ff88; box-shadow: 0 0 10px #00ff88; }
-        
         .hidden { display: none !important; }
-        
-        /* Стили для модалки активации */
-        #activation-modal { backdrop-filter: blur(8px); }
+        .blur-bg { backdrop-filter: blur(10px); }
+        input::placeholder { color: #4b5563; }
     </style>
 </head>
 <body class="text-white min-h-screen flex flex-col p-4 max-w-md mx-auto">
 
     <div id="menu-view">
         <header class="flex justify-between items-center mb-8">
-            <h1 class="font-bold text-xl neon-text">KEVO AI V4.0 🇰🇪</h1>
-            <div class="bg-green-900 px-3 py-1 rounded-full text-xs text-green-400 border border-green-500 animate-pulse">
-                VIP ONLINE
+            <h1 class="font-bold text-xl neon-text uppercase tracking-tighter">KEVO AI V4.0 🇰🇪</h1>
+            <div class="bg-green-900 px-3 py-1 rounded-full text-[10px] text-green-400 border border-green-500 animate-pulse">
+                SYSTEM ONLINE
             </div>
         </header>
 
         <div class="bg-gray-800 p-4 rounded-xl mb-6 border border-gray-700">
-            <h2 class="font-bold mb-1 italic text-yellow-500">Oya Brathee! 👋</h2>
-            <p class="text-sm text-gray-400 font-medium">Chagua game unataka kukula leo. Our AI is 99% sure.</p>
+            <h2 class="font-bold mb-1 text-yellow-500">Sema Brathee! 👋</h2>
+            <p class="text-xs text-gray-400">Enter your ID kwanza ndio AI i-link na account yako.</p>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
-            <div onclick="checkActivation('aviator')" class="game-card p-4 rounded-xl flex flex-col items-center gap-2">
+            <div onclick="requestID('aviator')" class="game-card p-4 rounded-xl flex flex-col items-center gap-2">
                 <i class="fas fa-plane-departure text-red-500 text-3xl"></i>
-                <span class="font-bold">Aviator Hack</span>
+                <span class="font-bold text-sm text-center">Aviator Predictor</span>
             </div>
-            <div onclick="checkActivation('mines')" class="game-card p-4 rounded-xl flex flex-col items-center gap-2">
+            <div onclick="requestID('mines')" class="game-card p-4 rounded-xl flex flex-col items-center gap-2">
                 <i class="fas fa-bomb text-yellow-500 text-3xl"></i>
-                <span class="font-bold">Mines Hack</span>
+                <span class="font-bold text-sm text-center">Mines Hack</span>
             </div>
-            <div onclick="checkActivation('penalty')" class="game-card p-4 rounded-xl flex flex-col items-center gap-2">
+            <div onclick="requestID('penalty')" class="game-card p-4 rounded-xl flex flex-col items-center gap-2">
                 <i class="fas fa-futbol text-blue-500 text-3xl"></i>
-                <span class="font-bold">Penalty Hack</span>
+                <span class="font-bold text-sm text-center">Penalty Target</span>
             </div>
-            <div class="game-card p-4 rounded-xl flex flex-col items-center gap-2 opacity-50">
+            <div class="game-card p-4 rounded-xl flex flex-col items-center gap-2 opacity-40">
                 <i class="fas fa-lock text-gray-500 text-3xl"></i>
-                <span class="font-bold text-gray-500">Coming Soon</span>
-            </div>
-        </div>
-
-        <div class="mt-8 bg-black p-4 rounded-xl border border-gray-800">
-            <h3 class="text-green-400 text-xs font-bold mb-2 flex items-center gap-2">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
-                LIVE M-PESA WITHDRAWALS:
-            </h3>
-            <div id="live-wins" class="text-[10px] space-y-1 font-mono text-gray-400"></div>
-        </div>
-    </div>
-
-    <div id="activation-modal" class="hidden fixed inset-0 flex items-center justify-center z-50 p-6">
-        <div class="bg-gray-900 border-2 border-red-600 rounded-3xl p-6 w-full shadow-[0_0_30px_rgba(239,68,68,0.5)]">
-            <div class="text-center">
-                <i class="fas fa-user-shield text-red-600 text-5xl mb-4"></i>
-                <h2 class="text-2xl font-black mb-2 text-white uppercase">Access Denied!</h2>
-                <p class="text-gray-300 text-sm mb-6 leading-relaxed">
-                    Buda, account yako bado haija-activatiwa kwa system yetu. To unlock <span class="text-red-500 font-bold underline">VIP Signals</span>, you must deposit at least <span class="text-white font-bold text-lg">350 KSh</span> to your account using Kevo's link.
-                </p>
-                
-                <div class="bg-black/40 p-4 rounded-xl mb-6 text-left border border-gray-700">
-                    <p class="text-red-500 font-bold text-xs mb-2">JINSI YA KU-ACTIVATE:</p>
-                    <ul class="text-[11px] text-gray-400 space-y-1">
-                        <li>1. Click button hapo chini</li>
-                        <li>2. Deposit exactly <span class="text-white">350 KSh</span> or more</li>
-                        <li>3. Your signals will unlock automatically!</li>
-                    </ul>
-                </div>
-
-                <a href="ТВОЯ_ССЫЛКА_ТУТ" class="block w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl font-black text-lg shadow-lg mb-4 transition-transform active:scale-95">
-                    DEPOSIT 350 KSh NOW 💸
-                </a>
-                
-                <button onclick="closeModal()" class="text-gray-500 text-xs font-bold uppercase tracking-widest">
-                    Rudi Nyuma
-                </button>
+                <span class="font-bold text-sm text-center">VIP Slots</span>
             </div>
         </div>
     </div>
 
-    <div id="aviator-view" class="hidden">
-        <button onclick="goBack()" class="mb-4 text-gray-400 flex items-center gap-2 italic">⬅ Rudi Nyuma</button>
-        <div class="bg-gray-800 p-6 rounded-2xl border border-red-600 shadow-xl">
-            <h2 class="text-2xl font-bold text-red-500 mb-4 text-center italic">AVIATOR PREDICTOR</h2>
-            <div class="aviator-screen mb-6">
-                <div id="aviator-result" class="text-5xl font-bold text-white hidden">x0.00</div>
-                <div id="aviator-loading" class="hidden text-red-500 font-mono animate-pulse uppercase">Scanning...</div>
-                <i id="aviator-icon" class="fas fa-plane plane-anim"></i>
+    <div id="id-modal" class="hidden fixed inset-0 blur-bg bg-black/80 flex items-center justify-center z-50 p-6">
+        <div class="bg-gray-900 border border-gray-700 rounded-3xl p-6 w-full text-center">
+            <div class="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-900">
+                <i class="fas fa-fingerprint text-white text-3xl"></i>
             </div>
-            <button onclick="predictAviator()" id="btn-aviator" class="w-full bg-red-600 py-4 rounded-xl font-bold text-lg">PATA SIGNAL 📡</button>
+            <h2 class="text-xl font-bold mb-2">VERIFY ACCOUNT</h2>
+            <p class="text-gray-400 text-sm mb-6">
+                Weka Game ID yako hapa chini ndio tuanze hacking process.
+            </p>
+            <input type="number" id="user-id-input" placeholder="E.g. 55823190" class="w-full bg-black border border-gray-600 rounded-xl p-4 text-center text-xl font-mono mb-4 focus:border-blue-500 outline-none">
+            <button onclick="processID()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition-all active:scale-95">
+                VERIFY ID ➜
+            </button>
+            <button onclick="closeModals()" class="mt-4 text-gray-600 text-xs uppercase font-bold">Cancel</button>
         </div>
     </div>
 
-    <div id="mines-view" class="hidden">
-        <button onclick="goBack()" class="mb-4 text-gray-400 flex items-center gap-2 italic">⬅ Rudi Nyuma</button>
-        <div class="bg-gray-800 p-4 rounded-2xl border border-yellow-600 shadow-xl">
-            <h2 class="text-2xl font-bold text-yellow-500 mb-4 text-center italic text-shadow-sm">MINES PREDICTOR</h2>
-            <div id="mines-grid" class="mines-grid mb-6"></div>
-            <button onclick="predictMines()" id="btn-mines" class="w-full bg-yellow-600 py-4 rounded-xl font-bold text-lg">FUNGUA NYOTA ⭐</button>
-        </div>
-    </div>
-
-    <div id="penalty-view" class="hidden">
-        <button onclick="goBack()" class="mb-4 text-gray-400 flex items-center gap-2">⬅ Rudi Nyuma</button>
-        <div class="bg-gray-800 p-6 rounded-2xl border border-blue-600 text-center">
-            <h2 class="text-2xl font-bold text-blue-500 mb-6 italic text-shadow-sm">PENALTY PREDICTOR</h2>
-            <div class="h-40 bg-green-800 rounded mb-6 flex items-center justify-center relative border-4 border-white">
-                <div id="penalty-target" class="hidden text-4xl animate-bounce absolute">⚽</div>
-                <p id="penalty-text" class="text-white opacity-50 italic">Waiting for signal...</p>
+    <div id="error-modal" class="hidden fixed inset-0 blur-bg bg-black/90 flex items-center justify-center z-50 p-6">
+        <div class="bg-gray-900 border-2 border-red-600 rounded-3xl p-6 w-full text-center">
+            <div class="text-red-600 text-6xl mb-4 animate-bounce">
+                <i class="fas fa-exclamation-triangle"></i>
             </div>
-            <button onclick="predictPenalty()" id="btn-penalty" class="w-full bg-blue-600 py-4 rounded-xl font-bold text-lg">ONA DIRECTION 🥅</button>
+            <h2 class="text-2xl font-black mb-2 text-white">ACTIVATION FAILED! 🚨</h2>
+            <p class="text-gray-300 text-sm mb-6">
+                Account ID <span id="display-id" class="text-white font-bold"></span> is <span class="text-red-500 font-bold underline">Inactive</span>. 
+                System yetu inakataa. Unahitaji balance ya angalau <span class="text-yellow-500 font-bold">350 KSh</span> kwa account yako kwanza ndio upate hizi signals.
+            </p>
+            
+            <div class="bg-red-900/20 p-4 rounded-xl mb-6 text-left border border-red-900/50">
+                <p class="text-red-500 font-bold text-[10px] mb-1 italic">ERROR CODE: 0x350_LOW_BALANCE</p>
+                <p class="text-gray-400 text-[11px]">Buda, deposit <span class="text-white font-bold">350 KSh</span> saizi, kisha rudi hapa ku-unlock signals.</p>
+            </div>
+
+            <a href="ТВОЯ_ССЫЛКА_ТУТ" class="block w-full bg-red-600 hover:bg-red-700 py-4 rounded-xl font-black text-lg shadow-lg mb-4 transition-transform active:scale-95">
+                DEPOSIT 350 KSh NOW 💸
+            </a>
+            
+            <p class="text-gray-500 text-[10px] uppercase">Wait 5 mins after deposit for activation</p>
         </div>
     </div>
 
     <script>
-        // ЛОГИКА АКТИВАЦИИ
-        let isAccountActive = false; // Флаг активации
+        let currentTarget = '';
 
-        function checkActivation(gameId) {
-            if (!isAccountActive) {
-                document.getElementById('activation-modal').classList.remove('hidden');
-            } else {
-                openGame(gameId);
+        // Показать окно ввода ID
+        function requestID(gameId) {
+            currentTarget = gameId;
+            document.getElementById('id-modal').classList.remove('hidden');
+        }
+
+        // Обработка ID и показ ошибки
+        function processID() {
+            const idInput = document.getElementById('user-id-input').value;
+            if (idInput.length < 4) {
+                alert("Weka valid ID kwanza, Boss!");
+                return;
             }
-        }
 
-        function closeModal() {
-            document.getElementById('activation-modal').classList.add('hidden');
-        }
-
-        function openGame(gameId) {
-            document.getElementById('menu-view').classList.add('hidden');
-            document.getElementById(gameId + '-view').classList.remove('hidden');
-            if(gameId === 'mines') initMines();
-        }
-
-        function goBack() {
-            document.querySelectorAll('[id$="-view"]').forEach(el => el.classList.add('hidden'));
-            document.getElementById('menu-view').classList.remove('hidden');
-        }
-
-        // AVIATOR
-        function predictAviator() {
-            const btn = document.getElementById('btn-aviator');
-            const res = document.getElementById('aviator-result');
-            const load = document.getElementById('aviator-loading');
-            const icon = document.getElementById('aviator-icon');
+            const btn = document.querySelector('#id-modal button');
+            btn.innerText = "CONNECTING TO DATABASE...";
             btn.disabled = true;
-            btn.innerText = "CONNECTING...";
-            icon.classList.add('hidden');
-            res.classList.add('hidden');
-            load.classList.remove('hidden');
-            setTimeout(() => {
-                load.classList.add('hidden');
-                res.classList.remove('hidden');
-                let val = (Math.random() * (7 - 1.2) + 1.2).toFixed(2);
-                res.innerText = "x" + val;
-                btn.disabled = false;
-                btn.innerText = "PATA SIGNAL TENA 📡";
-            }, 2500);
-        }
 
-        // MINES
-        function initMines() {
-            const grid = document.getElementById('mines-grid');
-            grid.innerHTML = '';
-            for(let i=0; i<25; i++) {
-                let d = document.createElement('div');
-                d.className = 'mine-cell';
-                d.id = 'm'+i;
-                grid.appendChild(d);
-            }
-        }
-        function predictMines() {
-            const btn = document.getElementById('btn-mines');
-            btn.innerText = "ANALYZING...";
-            document.querySelectorAll('.mine-cell').forEach(c => {
-                c.innerHTML = ''; 
-                c.classList.remove('active');
-            });
             setTimeout(() => {
-                for(let k=0; k<4; k++) {
-                    let r = Math.floor(Math.random()*25);
-                    const cell = document.getElementById('m'+r);
-                    cell.innerHTML = '⭐';
-                    cell.classList.add('active');
-                }
-                btn.innerText = "FUNGUA NYOTA ⭐";
+                document.getElementById('display-id').innerText = idInput;
+                document.getElementById('id-modal').classList.add('hidden');
+                document.getElementById('error-modal').classList.remove('hidden');
+                btn.innerText = "VERIFY ID ➜";
+                btn.disabled = false;
             }, 1500);
         }
 
-        // PENALTY
-        function predictPenalty() {
-            const t = document.getElementById('penalty-target');
-            const txt = document.getElementById('penalty-text');
-            t.classList.add('hidden');
-            txt.innerText = "Scanning Keeper...";
-            setTimeout(() => {
-                txt.innerText = "";
-                t.classList.remove('hidden');
-                const pos = ['top:15%;left:15%', 'top:15%;right:15%', 'bottom:15%;left:15%', 'bottom:15%;right:15%'];
-                t.style.cssText = pos[Math.floor(Math.random()*pos.length)];
-            }, 1800);
+        function closeModals() {
+            document.getElementById('id-modal').classList.add('hidden');
+            document.getElementById('error-modal').classList.add('hidden');
         }
 
-        // LIVE FEED (M-PESA STYLE)
+        // Остальная логика (Live Feed)
         setInterval(() => {
-            const names = ['Kevo', 'Deno', 'Brayo', 'Moha', 'Steve', 'Oti', 'Viko'];
+            const names = ['Kevo', 'Sammy', 'Deno', 'Moha', 'Omosh'];
             const n = names[Math.floor(Math.random()*names.length)];
-            const sum = Math.floor(Math.random() * 8000) + 1200;
+            const sum = Math.floor(Math.random() * 5000) + 500;
             const div = document.createElement('div');
-            div.className = "flex justify-between border-b border-gray-900 pb-1";
-            div.innerHTML = `<span class="text-green-500 font-bold">➜ ${n}</span> <span class="text-gray-500">KSh ${sum} paid</span>`;
+            div.className = "flex justify-between border-b border-gray-900 pb-1 py-1";
+            div.innerHTML = `<span class="text-green-500 font-bold">➜ ${n}</span> <span class="text-gray-500">KSh ${sum} withdrawn</span>`;
             const box = document.getElementById('live-wins');
-            box.prepend(div);
-            if(box.children.length > 5) box.lastChild.remove();
+            if(box) {
+                box.prepend(div);
+                if(box.children.length > 4) box.lastChild.remove();
+            }
         }, 3000);
     </script>
 </body>
