@@ -1,227 +1,110 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kevo VIP Predictor - Kenya Edition</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { background-color: #0f172a; font-family: sans-serif; }
-        .neon-text { text-shadow: 0 0 10px #00ff88; }
-        .game-card {
-            background: linear-gradient(145deg, #1e293b, #0f172a);
-            border: 1px solid #334155;
-            cursor: pointer;
-        }
-        .game-card:active { transform: scale(0.98); }
-        
-        /* Анимация самолета */
-        .aviator-screen {
-            background: #000;
-            border-radius: 1rem;
-            height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #ef4444;
-            position: relative;
-            overflow: hidden;
-        }
-        .plane-anim { font-size: 3rem; color: #ef4444; animation: fly 1s infinite alternate; }
-        @keyframes fly { from { transform: translateY(10px); } to { transform: translateY(-10px); } }
-
-        /* Сетка для мин */
-        .mines-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; }
-        .mine-cell {
-            background: #334155;
-            aspect-ratio: 1;
-            border-radius: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .mine-cell.active { background: #00ff88; }
-
-        .hidden { display: none !important; }
-    </style>
-</head>
-<body class="text-white min-h-screen flex flex-col p-4 max-w-md mx-auto">
-
-    <div id="menu-view">
-        <header class="flex justify-between items-center mb-8">
-            <h1 class="font-bold text-xl neon-text">KEVO AI V4.0 🇰🇪</h1>
-            <div class="bg-green-900 px-3 py-1 rounded-full text-xs text-green-400 border border-green-500">
-                VIP ONLINE
-            </div>
-        </header>
-
-        <div class="bg-gray-800 p-4 rounded-xl mb-6 border border-gray-700">
-            <h2 class="font-bold mb-1">Karibu Brathee! 👋</h2>
-            <p class="text-sm text-gray-400">Chagua game unataka kuhack leo. AI yetu iko ready.</p>
-        </div>
-        
-        <div class="grid grid-cols-2 gap-4">
-            <div onclick="openGame('aviator')" class="game-card p-4 rounded-xl flex flex-col items-center gap-2">
-                <i class="fas fa-plane-departure text-red-500 text-3xl"></i>
-                <span class="font-bold">Aviator Hack</span>
-            </div>
-            
-            <div onclick="openGame('mines')" class="game-card p-4 rounded-xl flex flex-col items-center gap-2">
-                <i class="fas fa-bomb text-yellow-500 text-3xl"></i>
-                <span class="font-bold">Mines Hack</span>
-            </div>
-            
-            <div onclick="openGame('penalty')" class="game-card p-4 rounded-xl flex flex-col items-center gap-2">
-                <i class="fas fa-futbol text-blue-500 text-3xl"></i>
-                <span class="font-bold">Penalty Hack</span>
-            </div>
-        </div>
-
-        <div class="mt-8 bg-black p-4 rounded-xl border border-gray-800">
-            <h3 class="text-green-400 text-xs font-bold mb-2">LIVE M-PESA WITHDRAWALS:</h3>
-            <div id="live-wins" class="text-xs space-y-1 font-mono text-gray-400"></div>
-        </div>
-    </div>
-
-    <div id="aviator-view" class="hidden">
-        <button onclick="goBack()" class="mb-4 text-gray-400 flex items-center gap-2">⬅ Rudi Nyuma</button>
-        
-        <div class="bg-gray-800 p-6 rounded-2xl border border-red-600 shadow-xl">
-            <h2 class="text-2xl font-bold text-red-500 mb-4 text-center">AVIATOR PREDICTOR</h2>
-            
-            <div class="aviator-screen mb-6">
-                <div id="aviator-result" class="text-5xl font-bold text-white hidden">x0.00</div>
-                <div id="aviator-loading" class="hidden text-red-500 font-mono animate-pulse">ANALYZING...</div>
-                <i id="aviator-icon" class="fas fa-plane plane-anim"></i>
-            </div>
-
-            <button onclick="predictAviator()" id="btn-aviator" class="w-full bg-red-600 py-4 rounded-xl font-bold text-lg shadow-lg">
-                PATA SIGNAL 📡
-            </button>
-        </div>
-    </div>
-
-    <div id="mines-view" class="hidden">
-        <button onclick="goBack()" class="mb-4 text-gray-400 flex items-center gap-2">⬅ Rudi Nyuma</button>
-
-        <div class="bg-gray-800 p-4 rounded-2xl border border-yellow-600 shadow-xl">
-            <h2 class="text-2xl font-bold text-yellow-500 mb-4 text-center">MINES PREDICTOR</h2>
-
-            <div id="mines-grid" class="mines-grid mb-6"></div>
-
-            <button onclick="predictMines()" id="btn-mines" class="w-full bg-yellow-600 py-4 rounded-xl font-bold text-lg shadow-lg">
-                FUNGUA NYOTA ⭐
-            </button>
-        </div>
-    </div>
-
-    <div id="penalty-view" class="hidden">
-        <button onclick="goBack()" class="mb-4 text-gray-400 flex items-center gap-2">⬅ Rudi Nyuma</button>
-        <div class="bg-gray-800 p-6 rounded-2xl border border-blue-600 text-center">
-            <h2 class="text-2xl font-bold text-blue-500 mb-6">PENALTY PREDICTOR</h2>
-            <div class="h-40 bg-green-800 rounded mb-6 flex items-center justify-center relative border-4 border-white">
-                <div id="penalty-target" class="hidden text-4xl animate-bounce absolute">⚽</div>
-                <p id="penalty-text" class="text-white opacity-50">Waiting for signal...</p>
-            </div>
-            <button onclick="predictPenalty()" id="btn-penalty" class="w-full bg-blue-600 py-4 rounded-xl font-bold text-lg">
-                ONA DIRECTION 🥅
-            </button>
-        </div>
-    </div>
-
-    <script>
-        // НАВИГАЦИЯ
-        function openGame(gameId) {
+// НАВИГАЦИЯ
+function openGame(gameId) {
+    // Проверка баланса
+    checkBalance().then((hasEnough) => {
+        if (hasEnough) {
             document.getElementById('menu-view').classList.add('hidden');
             document.getElementById(gameId + '-view').classList.remove('hidden');
-            if(gameId === 'mines') initMines();
+            if (gameId === 'mines') initMines();
         }
+    });
+}
 
-        function goBack() {
-            document.querySelectorAll('[id$="-view"]').forEach(el => el.classList.add('hidden'));
-            document.getElementById('menu-view').classList.remove('hidden');
+function goBack() {
+    document.querySelectorAll('[id$="-view"]').forEach(el => el.classList.add('hidden'));
+    document.getElementById('menu-view').classList.remove('hidden');
+}
+
+// Проверка баланса
+function checkBalance() {
+    return new Promise((resolve) => {
+        // Здесь вы можете заменить эту логику на настоящую проверку баланса
+        const balance = Math.floor(Math.random() * 500); // Случайный баланс для примера
+        if (balance >= 350) {
+            resolve(true);
+        } else {
+            alert("Samahani, unahitaji KSh 350 kama kiwango cha chini ili kuweza kuingia kwenye mchezo.");
+            resolve(false);
         }
+    });
+}
 
-        // ЛОГИКА AVIATOR
-        function predictAviator() {
-            const btn = document.getElementById('btn-aviator');
-            const res = document.getElementById('aviator-result');
-            const load = document.getElementById('aviator-loading');
-            const icon = document.getElementById('aviator-icon');
+// ЛОГИКА AVIATOR
+function predictAviator() {
+    const btn = document.getElementById('btn-aviator');
+    const res = document.getElementById('aviator-result');
+    const load = document.getElementById('aviator-loading');
+    const icon = document.getElementById('aviator-icon');
 
-            btn.disabled = true;
-            btn.innerText = "WAITING...";
-            icon.classList.add('hidden');
-            res.classList.add('hidden');
-            load.classList.remove('hidden');
+    btn.disabled = true;
+    btn.innerText = "WAITING...";
+    icon.classList.add('hidden');
+    res.classList.add('hidden');
+    load.classList.remove('hidden');
 
-            setTimeout(() => {
-                load.classList.add('hidden');
-                res.classList.remove('hidden');
-                let val = (Math.random() * (10 - 1.5) + 1.5).toFixed(2);
-                res.innerText = "x" + val;
-                btn.disabled = false;
-                btn.innerText = "PATA SIGNAL TENA 📡";
-            }, 2000);
+    setTimeout(() => {
+        load.classList.add('hidden');
+        res.classList.remove('hidden');
+        let val = (Math.random() * (10 - 1.5) + 1.5).toFixed(2);
+        res.innerText = "x" + val;
+        btn.disabled = false;
+        btn.innerText = "PATA SIGNAL TENA 📡";
+    }, 2000);
+}
+
+// ЛОГИКА MINES
+function initMines() {
+    const grid = document.getElementById('mines-grid');
+    grid.innerHTML = '';
+    for (let i = 0; i < 25; i++) {
+        let d = document.createElement('div');
+        d.className = 'mine-cell';
+        d.id = 'm' + i;
+        grid.appendChild(d);
+    }
+}
+
+function predictMines() {
+    const btn = document.getElementById('btn-mines');
+    btn.innerText = "CALCULATING...";
+    document.querySelectorAll('.mine-cell').forEach(c => {
+        c.innerHTML = '';
+        c.classList.remove('active');
+    });
+
+    setTimeout(() => {
+        for (let k = 0; k < 4; k++) {
+            let r = Math.floor(Math.random() * 25);
+            document.getElementById('m' + r).innerHTML = '⭐';
+            document.getElementById('m' + r).classList.add('active');
         }
+        btn.innerText = "FUNGUA NYOTA ⭐";
+    }, 1000);
+}
 
-        // ЛОГИКА MINES
-        function initMines() {
-            const grid = document.getElementById('mines-grid');
-            grid.innerHTML = '';
-            for(let i=0; i<25; i++) {
-                let d = document.createElement('div');
-                d.className = 'mine-cell';
-                d.id = 'm'+i;
-                grid.appendChild(d);
-            }
-        }
-        function predictMines() {
-            const btn = document.getElementById('btn-mines');
-            btn.innerText = "CALCULATING...";
-            document.querySelectorAll('.mine-cell').forEach(c => {
-                c.innerHTML = ''; 
-                c.classList.remove('active');
-            });
-            
-            setTimeout(() => {
-                for(let k=0; k<4; k++) {
-                    let r = Math.floor(Math.random()*25);
-                    document.getElementById('m'+r).innerHTML = '⭐';
-                    document.getElementById('m'+r).classList.add('active');
-                }
-                btn.innerText = "FUNGUA NYOTA ⭐";
-            }, 1000);
-        }
+// ЛОГИКА PENALTY
+function predictPenalty() {
+    const t = document.getElementById('penalty-target');
+    const txt = document.getElementById('penalty-text');
+    t.classList.add('hidden');
+    txt.innerText = "Analyzing...";
 
-        // ЛОГИКА PENALTY
-        function predictPenalty() {
-            const t = document.getElementById('penalty-target');
-            const txt = document.getElementById('penalty-text');
-            t.classList.add('hidden');
-            txt.innerText = "Analyzing...";
-            
-            setTimeout(() => {
-                txt.innerText = "";
-                t.classList.remove('hidden');
-                // Случайная позиция мяча
-                const positions = ['top:10%;left:10%', 'top:10%;right:10%', 'bottom:10%;left:10%', 'bottom:10%;right:10%'];
-                t.style.cssText = positions[Math.floor(Math.random()*positions.length)];
-            }, 1500);
-        }
+    setTimeout(() => {
+        txt.innerText = "";
+        t.classList.remove('hidden');
+        const positions = ['top:10%;left:10%', 'top:10%;right:10%', 'bottom:10%;left:10%', 'bottom:10%;right:10%'];
+        t.style.cssText = positions[Math.floor(Math.random() * positions.length)];
+    }, 1500);
+}
 
-        // ЖИВАЯ ЛЕНТА
-        setInterval(() => {
-            const names = ['Kevo', 'John', 'Brian', 'Moha', 'Sam'];
-            const n = names[Math.floor(Math.random()*names.length)];
-            const sum = Math.floor(Math.random() * 10000) + 1000;
-            const div = document.createElement('div');
-            div.innerHTML = `<span class="text-green-500">➜ ${n}</span> withdrew <span class="text-white">KSh ${sum}</span>`;
-            const box = document.getElementById('live-wins');
-            box.prepend(div);
-            if(box.children.length > 4) box.lastChild.remove();
-        }, 2000);
-    </script>
-</body>
-</html>
+// ЖИВАЯ ЛЕНТА
+setInterval(() => {
+    const names = ['Kevo', 'John', 'Brian', 'Moha', 'Sam'];
+    const n = names[Math.floor(Math.random() * names.length)];
+    const sum = Math.floor(Math.random() * 10000) + 1000;
+    const div = document.createElement('div');
+    div.innerHTML = `<span class="text-green-500">➜ ${n}</span> withdrew <span class="text-white">KSh ${sum}</span>`;
+    const box = document.getElementById('live-wins');
+    box.prepend(div);
+    if (box.children.length > 4) box.lastChild.remove();
+}, 2000);
